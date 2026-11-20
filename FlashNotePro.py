@@ -52,11 +52,10 @@ class FlashNoteProApp:
             pass
 
         self.notes = self.load_notes()
-        self.filter_mode = "all"  # all | pending | done | reminded
+        self.filter_mode = "all"
         self.sound_enabled = True
         self.active_reminder_ids = set()
 
-        # 新建闪念时的可选提醒状态
         self.new_reminder_enabled = tk.BooleanVar(value=False)
         self.new_reminder_dt_var = tk.StringVar(
             value=(datetime.now() + timedelta(hours=1)).strftime("%Y-%m-%d %H:%M")
@@ -132,7 +131,6 @@ class FlashNoteProApp:
         self.new_reminder_dt_var.set(target.strftime("%Y-%m-%d %H:%M"))
 
     def build_ui(self):
-        # 顶部栏
         header = tk.Frame(self.root, bg=COLORS["bg_main"], padx=26, pady=14)
         header.pack(fill=tk.X)
 
@@ -183,7 +181,6 @@ class FlashNoteProApp:
         )
         self.clock_label.pack(side=tk.LEFT)
 
-        # 到期提醒横幅区（仅在有到期未处理闪念时显示）
         self.alert_banner = tk.Frame(
             self.root,
             bg=COLORS["warn_bg"],
@@ -216,7 +213,6 @@ class FlashNoteProApp:
             command=self.snooze_all_due
         ).pack(side=tk.RIGHT)
 
-        # 输入卡片区
         input_wrap = tk.Frame(self.root, bg=COLORS["border"], padx=1, pady=1)
         input_wrap.pack(fill=tk.X, padx=26, pady=(0, 10))
 
@@ -236,8 +232,7 @@ class FlashNoteProApp:
         self.input_text.pack(fill=tk.X)
         self.input_text.bind("<Control-Return>", lambda e: self.add_note())
 
-        # 标签 + 快捷按钮行
-        row1 = tk.Frame(input_card, bg=COLORS["bg_input"], pady=(8, 4))
+        row1 = tk.Frame(input_card, bg=COLORS["bg_input"], pady=6)
         row1.pack(fill=tk.X)
 
         tk.Label(
@@ -285,8 +280,7 @@ class FlashNoteProApp:
             command=self.add_note
         ).pack(side=tk.RIGHT)
 
-        # 按需设置提醒行（默认不启用）
-        row2 = tk.Frame(input_card, bg=COLORS["bg_input"], pady=(4, 0))
+        row2 = tk.Frame(input_card, bg=COLORS["bg_input"], pady=4)
         row2.pack(fill=tk.X)
 
         tk.Checkbutton(
@@ -334,7 +328,6 @@ class FlashNoteProApp:
                 command=cmd
             ).pack(side=tk.LEFT, padx=2)
 
-        # 筛选与搜索栏
         filter_bar = tk.Frame(self.root, bg=COLORS["bg_main"], padx=26, pady=6)
         filter_bar.pack(fill=tk.X)
 
@@ -398,7 +391,6 @@ class FlashNoteProApp:
             bg=COLORS["bg_main"]
         ).pack(side=tk.RIGHT)
 
-        # 列表滚动区
         list_wrap = tk.Frame(self.root, bg=COLORS["bg_main"], padx=26, pady=6)
         list_wrap.pack(fill=tk.BOTH, expand=True)
 
@@ -479,11 +471,11 @@ class FlashNoteProApp:
             "weekday": weekday,
             "tag": tag,
             "content": content,
-            "status": "pending",         # pending | done
-            "result_note": "",           # 处理结果记录
-            "handled_at": "",            # 处理完成时间
-            "reminder_at": reminder_iso, # 约定提醒时间（可为空）
-            "reminded_fired": False      # 是否已触发过到期提醒
+            "status": "pending",
+            "result_note": "",
+            "handled_at": "",
+            "reminder_at": reminder_iso,
+            "reminded_fired": False
         }
 
         self.notes.insert(0, item)
@@ -534,7 +526,7 @@ class FlashNoteProApp:
             font=("Microsoft YaHei UI", 9, "bold"),
             fg=COLORS["text_primary"],
             bg=COLORS["bg_main"]
-        ).pack(anchor="w", padx=18, pady=(16, 6))
+        ).pack(anchor="w", padx=18, pady=12)
 
         default_str = note.get("reminder_at") or (
             datetime.now() + timedelta(minutes=30)
@@ -678,7 +670,7 @@ class FlashNoteProApp:
                 text=f"⏰ 提醒到期（尚未处理）：{titles}{extra} —— 请及时处理并填写结果"
             )
             if not self.alert_banner.winfo_ismapped():
-                self.alert_banner.pack(fill=tk.X, padx=26, pady=(0, 8), before=self.root.winfo_children()[2])
+                self.alert_banner.pack(fill=tk.X, padx=26, pady=6, before=self.root.winfo_children()[2])
         else:
             if self.alert_banner.winfo_ismapped():
                 self.alert_banner.pack_forget()
@@ -734,7 +726,7 @@ class FlashNoteProApp:
                     fg=COLORS["text_secondary"],
                     bg=COLORS["bg_main"],
                     anchor="w"
-                ).pack(fill=tk.X, pady=(10, 4))
+                ).pack(fill=tk.X, pady=6)
 
             is_done = n.get("status") == "done"
             is_overdue = (n["id"] in self.active_reminder_ids) and not is_done
@@ -746,9 +738,8 @@ class FlashNoteProApp:
             card = tk.Frame(outer, bg=COLORS["bg_card"], padx=14, pady=10)
             card.pack(fill=tk.X)
 
-            # 顶部状态与时间栏
             top = tk.Frame(card, bg=COLORS["bg_card"])
-            top.pack(fill=tk.X, pady=(0, 6))
+            top.pack(fill=tk.X, pady=4)
 
             status_btn = tk.Button(
                 top,
@@ -830,7 +821,6 @@ class FlashNoteProApp:
                 command=lambda note=n: self.update_reminder_dialog(note)
             ).pack(side=tk.RIGHT, padx=(0, 6))
 
-            # 闪念正文
             tk.Label(
                 card,
                 text=n["content"],
@@ -840,9 +830,8 @@ class FlashNoteProApp:
                 justify=tk.LEFT,
                 anchor="w",
                 wraplength=640
-            ).pack(fill=tk.X, pady=(2, 8))
+            ).pack(fill=tk.X, pady=6)
 
-            # 后续处理结果记录框
             res_box = tk.Frame(
                 card,
                 bg=COLORS["bg_result"],
@@ -854,7 +843,7 @@ class FlashNoteProApp:
             res_box.pack(fill=tk.X)
 
             res_header = tk.Frame(res_box, bg=COLORS["bg_result"])
-            res_header.pack(fill=tk.X, pady=(0, 4))
+            res_header.pack(fill=tk.X, pady=2)
 
             tk.Label(
                 res_header,
@@ -884,7 +873,7 @@ class FlashNoteProApp:
                 highlightcolor=COLORS["accent"]
             )
             res_entry.insert(0, n.get("result_note", ""))
-            res_entry.pack(fill=tk.X, ipady=3, pady=(0, 6))
+            res_entry.pack(fill=tk.X, ipady=3, pady=4)
 
             res_actions = tk.Frame(res_box, bg=COLORS["bg_result"])
             res_actions.pack(fill=tk.X)
